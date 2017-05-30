@@ -30,13 +30,18 @@ import com.gelakinetic.mtgfam.helpers.database.DatabaseManager;
 import com.gelakinetic.mtgfam.helpers.database.FamiliarDbException;
 import com.gelakinetic.mtgfam.helpers.CardHelpers.CompressedCardInfo;
 
+import java.util.ArrayList;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Encapsulate all information about a magic card
  */
 public class MtgCard extends Card {
     private static final String DELIMITER = "%";
+
+    public String colorIdentity;
 
     /* Wish and trade list fields */
     public String setName;
@@ -69,9 +74,7 @@ public class MtgCard extends Card {
         mNumber = "";
         mColor = "";
         mMultiverseId = 0;
-        mColorIdentity = "";
-        mWatermark = "";
-        mForeignPrintings.clear();
+        colorIdentity = "";
     }
 
     public MtgCard(Card card) {
@@ -90,9 +93,6 @@ public class MtgCard extends Card {
         this.mNumber = card.mNumber;
         this.mColor = card.mColor;
         this.mMultiverseId = card.mMultiverseId;
-        this.mColorIdentity = card.mColorIdentity;
-        this.mWatermark = card.mWatermark;
-        this.mForeignPrintings.addAll(card.mForeignPrintings);
     }
 
     /**
@@ -264,12 +264,8 @@ public class MtgCard extends Card {
      * @return A String representing this card
      */
     public String toWishlistString() {
-        return  this.mName + DELIMITER +
-                this.setCode + DELIMITER +
-                this.numberOf + DELIMITER +
-                this.mNumber + DELIMITER +
-                ((int) this.mRarity) + DELIMITER +
-                this.foil + '\n';
+        return this.mName + DELIMITER + this.setCode + DELIMITER + this.numberOf + DELIMITER + this.mNumber + DELIMITER +
+                ((int) this.mRarity) + DELIMITER + this.foil + '\n';
     }
 
 
@@ -302,12 +298,6 @@ public class MtgCard extends Card {
         /* "foil" didn't exist in earlier versions, so it may not be part of the string */
         if (parts.length > 3) {
             newCard.mNumber = parts[3];
-            /* This is to fix a bug where the number was saved as the name. Clear it so it gets
-             * fixed later
-             */
-            if(newCard.mNumber.equals(newCard.mName)) {
-                newCard.mNumber = "";
-            }
         }
         if (parts.length > 4) {
             newCard.mRarity = (char) Integer.parseInt(parts[4]);
@@ -375,6 +365,106 @@ public class MtgCard extends Card {
                 sb.append(mToughness);
             }
             sb.append("\r\n");
+        }
+    }
+
+    /************************************************
+     *          MtgCards and Color Identity         *
+     ************************************************/
+
+    /**
+     * Calculates the mColor identity for this card, not counting any parts of a
+     * multicard
+     *
+     * @param card The card to find a mColor identity for, excluding multicard
+     * @return A mColor identity string for the given card consisting of "WUBRG"
+     */
+    private static String getColorIdentity(MtgCard card) {
+        boolean colors[] = {false, false, false, false, false};
+        String colorLetters[] = {"W", "U", "B", "R", "G"};
+        String basicLandTypes[] = {"Plains", "Island", "Swamp", "Mountain",
+                "Forest"};
+
+		/* Search for colors in the cost & mColor */
+        for (int i = 0; i < colors.length; i++) {
+            if (card.mColor.contains(colorLetters[i])) {
+                colors[i] = true;
+            }
+            if (card.mManaCost.contains(colorLetters[i])) {
+                colors[i] = true;
+            }
+        }
+
+		/* Remove reminder text */
+        String noReminderText = card.mText.replaceAll("\\([^\\(\\)]+\\)", "");
+        /* Find mana symbols in the rest of the text */
+        Pattern manaPattern = Pattern.compile("\\{[^\\{\\}]+\\}");
+        Matcher m = manaPattern.matcher(noReminderText);
+        while (m.find()) {
+            /* Search for colors in the mana symbols in the non-reminder text */
+            for (int i = 0; i < colors.length; i++) {
+                if (m.group(0).contains(colorLetters[i])) {
+                    colors[i] = true;
+                }
+            }
+        }
+
+		/* For typed lands, add mColor identity */
+        if (card.mType.toLowerCase().contains("land")) {
+            for (int i = 0; i < colors.length; i++) {
+                if (card.mType.contains(basicLandTypes[i])) {
+                    colors[i] = true;
+                }
+            }
+        }
+
+		/* Write the mColor identity */
+        String colorIdentity = "";
+        for (int i = 0; i < colors.length; i++) {
+            if (colors[i]) {
+                colorIdentity += colorLetters[i];
+            }
+        }
+        return colorIdentity;
+    }
+
+    /**
+     * Calculates the full mColor identity for this card, and stores it in
+     * mColorIdentity
+     *
+     * @param otherCards A list of other cards, used to find the second part if this is
+     *                   a multi-card
+     */
+    public void calculateColorIdentity(ArrayList<MtgCard> otherCards) {
+        String colorLetters[] = {"W", "U", "B", "R", "G"};
+
+		/* Get the mColor identity for the first part of the card */
+        String firstPartIdentity = getColorIdentity(this);
+
+		/* Find the mColor identity for multicards */
+        String secondPartIdentity = "";
+        String newNumber = null;
+        if (mNumber.contains("a")) {
+            newNumber = mNumber.replace("a", "b");
+        } else if (mNumber.contains("b")) {
+            newNumber = mNumber.replace("b", "a");
+        }
+        if (newNumber != null) {
+            for (MtgCard c : otherCards) {
+                if (c.mNumber.equals(newNumber)) {
+                    secondPartIdentity = getColorIdentity(c);
+                    break;
+                }
+            }
+        }
+
+		/* Combine the two mColor identity parts into one */
+        this.colorIdentity = "";
+        for (String colorLetter : colorLetters) {
+            if (firstPartIdentity.contains(colorLetter)
+                    || secondPartIdentity.contains(colorLetter)) {
+                colorIdentity += colorLetter;
+            }
         }
     }
 }

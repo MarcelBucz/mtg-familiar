@@ -2,6 +2,8 @@ package com.gelakinetic.mtgfam.helpers;
 
 import com.gelakinetic.mtgfam.helpers.DecklistHelpers.CompressedDecklistInfo;
 
+import org.apache.commons.collections4.comparators.ComparatorChain;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -56,7 +58,7 @@ public class CardHelpers {
 
             isi.mSet = card.setName;
             isi.mSetCode = card.setCode;
-            isi.mNumber = card.mNumber;
+            isi.mNumber = card.mName;
             isi.mIsFoil = card.foil;
             isi.mPrice = null;
             isi.mMessage = card.message;
@@ -87,18 +89,25 @@ public class CardHelpers {
 
     }
 
+    public static ComparatorChain<CompressedCardInfo> getComparatorWithName(Comparator<CompressedCardInfo> comparator) {
+        ComparatorChain<CompressedCardInfo> chain = new ComparatorChain<>();
+        chain.addComparator(comparator);
+        chain.addComparator(new CardComparatorName());
+        return chain;
+    }
+
     /* Comparator based on name */
-    public static class CardComparatorName implements Comparator<CompressedDecklistInfo> {
+    public static class CardComparatorName implements Comparator<CompressedCardInfo> {
         @Override
-        public int compare(CompressedDecklistInfo card1, CompressedDecklistInfo card2) {
+        public int compare(CompressedCardInfo card1, CompressedCardInfo card2) {
             return card1.mCard.mName.compareTo(card2.mCard.mName);
         }
     }
 
     /* Comparator based on CMC */
-    public static class CardComparatorCMC implements Comparator<CompressedDecklistInfo> {
+    public static class CardComparatorCMC implements Comparator<CompressedCardInfo> {
         @Override
-        public int compare(CompressedDecklistInfo card1, CompressedDecklistInfo card2) {
+        public int compare(CompressedCardInfo card1, CompressedCardInfo card2) {
             if (card1.mCard.mCmc == card2.mCard.mCmc) {
                 return 0;
             } else if (card1.mCard.mCmc > card2.mCard.mCmc) {
@@ -109,7 +118,7 @@ public class CardHelpers {
     }
 
     /* Comparator based on color */
-    public static class CardComparatorColor implements Comparator<CompressedDecklistInfo> {
+    public static class CardComparatorColor implements Comparator<CompressedCardInfo> {
 
         private static final String colors = "WUBRG";
         private static final String nonColors = "LAC";
@@ -135,7 +144,7 @@ public class CardHelpers {
         }
 
         @Override
-        public int compare(CompressedDecklistInfo card1, CompressedDecklistInfo card2) {
+        public int compare(CompressedCardInfo card1, CompressedCardInfo card2) {
             String cardColors1 = getColors(card1.mCard.mColor);
             String cardColors2 = getColors(card2.mCard.mColor);
             int priority1;
@@ -187,13 +196,13 @@ public class CardHelpers {
 
     /* Comparator based on card supertype
      * must pass an array of types in the order you wish to sort */
-    public static class CardComparatorSupertype implements Comparator<CompressedDecklistInfo> {
+    public static class CardComparatorSupertype implements Comparator<CompressedCardInfo> {
         final String[] mTypes;
         public CardComparatorSupertype(String[] superTypes) {
             mTypes = superTypes;
         }
         @Override
-        public int compare(CompressedDecklistInfo card1, CompressedDecklistInfo card2) {
+        public int compare(CompressedCardInfo card1, CompressedCardInfo card2) {
             String card1Type = card1.mCard.mType;
             String card2Type = card2.mCard.mType;
             for (String type : mTypes) {
@@ -281,7 +290,7 @@ public class CardHelpers {
     }
 
     /* Comparator based on first set of a card */
-    private static class CardComparatorSet implements Comparator<CompressedCardInfo> {
+    public static class CardComparatorSet implements Comparator<CompressedCardInfo> {
         @Override
         public int compare(CompressedCardInfo card1, CompressedCardInfo card2) {
             return card1.mInfo.get(0).mSet.compareTo(card2.mInfo.get(0).mSet);

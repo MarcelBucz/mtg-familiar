@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.Cursor;
-import android.support.v4.content.ContextCompat;
 import android.text.Html.ImageGetter;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -136,23 +135,23 @@ public class ResultListAdapter extends SimpleCursorAdapter {
                     switch (rarity) {
                         case 'c':
                         case 'C':
-                            textField.setTextColor(ContextCompat.getColor(context, getResourceIdFromAttr(R.attr.color_common)));
+                            textField.setTextColor(mResources.getColor(getResourceIdFromAttr(R.attr.color_common)));
                             break;
                         case 'u':
                         case 'U':
-                            textField.setTextColor(ContextCompat.getColor(context, getResourceIdFromAttr(R.attr.color_uncommon)));
+                            textField.setTextColor(mResources.getColor(getResourceIdFromAttr(R.attr.color_uncommon)));
                             break;
                         case 'r':
                         case 'R':
-                            textField.setTextColor(ContextCompat.getColor(context, getResourceIdFromAttr(R.attr.color_rare)));
+                            textField.setTextColor(mResources.getColor(getResourceIdFromAttr(R.attr.color_rare)));
                             break;
                         case 'm':
                         case 'M':
-                            textField.setTextColor(ContextCompat.getColor(context, getResourceIdFromAttr(R.attr.color_mythic)));
+                            textField.setTextColor(mResources.getColor(getResourceIdFromAttr(R.attr.color_mythic)));
                             break;
                         case 't':
                         case 'T':
-                            textField.setTextColor(ContextCompat.getColor(context, getResourceIdFromAttr(R.attr.color_timeshifted)));
+                            textField.setTextColor(mResources.getColor(getResourceIdFromAttr(R.attr.color_timeshifted)));
                             break;
                     }
                     break;
@@ -191,8 +190,6 @@ public class ResultListAdapter extends SimpleCursorAdapter {
                             pow = "7-*";
                         else if (p == CardDbAdapter.STAR_SQUARED)
                             pow = "*^2";
-                        else if (p == CardDbAdapter.X)
-                            pow = "X";
                         else {
                             if (p == (int) p) {
                                 pow = Integer.valueOf((int) p).toString();
@@ -218,8 +215,6 @@ public class ResultListAdapter extends SimpleCursorAdapter {
                             tou = "7-*";
                         else if (t == CardDbAdapter.STAR_SQUARED)
                             tou = "*^2";
-                        else if (t == CardDbAdapter.X)
-                            tou = "X";
                         else {
                             if (t == (int) t) {
                                 tou = Integer.valueOf((int) t).toString();
@@ -234,12 +229,10 @@ public class ResultListAdapter extends SimpleCursorAdapter {
                     float l = cursor.getFloat(cursor.getColumnIndex(mFrom[i]));
                     if (l != CardDbAdapter.NO_ONE_CARES) {
                         hideLoyalty = false;
-                        if (l == CardDbAdapter.X) {
-                            ((TextView) textField.findViewById(R.id.cardt)).setText("X");
-                        } else if (l == (int) l) {
-                            ((TextView) textField.findViewById(R.id.cardt)).setText(Integer.toString((int) l));
+                        if (l == (int) l) {
+                            textField.setText(Integer.toString((int) l));
                         } else {
-                            ((TextView) textField.findViewById(R.id.cardt)).setText(Float.toString(l));
+                            textField.setText(Float.toString(l));
                         }
                     }
                     break;
