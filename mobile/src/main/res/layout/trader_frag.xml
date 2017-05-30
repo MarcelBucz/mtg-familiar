@@ -74,7 +74,6 @@
             <Button
                 android:id="@+id/addCardLeft"
                 style="?android:attr/buttonBarButtonStyle"
-
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:text="@string/trader_add_card"
@@ -131,7 +130,6 @@
             <Button
                 android:id="@+id/addCardRight"
                 style="?android:attr/buttonBarButtonStyle"
-
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:text="@string/trader_add_card"

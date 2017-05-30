@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.text.Html;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -324,26 +323,10 @@ public class WishlistFragment extends FamiliarFragment {
         /* Read the wishlist */
         ArrayList<MtgCard> wishlist = WishlistHelpers.ReadWishlist(getActivity());
         SQLiteDatabase database = DatabaseManager.getInstance(getActivity(), false).openDatabase(false);
-        boolean cardNumberFixed = false;
         try {
             /* Translate the set code to tcg name, of course it's not saved */
             for (MtgCard card : wishlist) {
                 card.setName = CardDbAdapter.getSetNameFromCode(card.setCode, database);
-
-                /* If the number is empty because of a prior bug, get it from the database */
-                if (card.mNumber.equals("")) {
-                    Cursor numberCursor = CardDbAdapter.fetchCardByName(card.mName, new String[]{CardDbAdapter.KEY_NUMBER, CardDbAdapter.KEY_CODE}, false, database);
-                    numberCursor.moveToFirst();
-                    while (!numberCursor.isAfterLast()) {
-                        if (card.setCode.equals(numberCursor.getString(numberCursor.getColumnIndex(CardDbAdapter.KEY_CODE)))) {
-                            card.mNumber = numberCursor.getString(numberCursor.getColumnIndex(CardDbAdapter.KEY_NUMBER));
-                            cardNumberFixed = true;
-                            break;
-                        }
-                        numberCursor.moveToNext();
-                    }
-                    numberCursor.close();
-                }
             }
 
             /* Clear the wishlist, or just the card that changed */
@@ -386,10 +369,6 @@ public class WishlistFragment extends FamiliarFragment {
 
             /* Fill extra card data from the database, for displaying full card info */
             CardDbAdapter.fillExtraWishlistData(mCompressedWishlist, database);
-
-            if(cardNumberFixed) {
-                WishlistHelpers.WriteCompressedWishlist(getContext(), mCompressedWishlist);
-            }
 
         } catch (FamiliarDbException e) {
             handleFamiliarDbException(false);
@@ -742,8 +721,6 @@ public class WishlistFragment extends FamiliarFragment {
                             pow = "7-*";
                         else if (p == CardDbAdapter.STAR_SQUARED)
                             pow = "*^2";
-                        else if (p == CardDbAdapter.X)
-                            pow = "X";
                         else {
                             if (p == (int) p) {
                                 pow = Integer.valueOf((int) p).toString();
@@ -775,8 +752,6 @@ public class WishlistFragment extends FamiliarFragment {
                             tou = "7-*";
                         else if (t == CardDbAdapter.STAR_SQUARED)
                             tou = "*^2";
-                        else if (t == CardDbAdapter.X)
-                            tou = "X";
                         else {
                             if (t == (int) t) {
                                 tou = Integer.valueOf((int) t).toString();
@@ -793,10 +768,7 @@ public class WishlistFragment extends FamiliarFragment {
                 /* Show the loyalty, if the card has any (traitor...) */
                 float loyalty = info.mCard.mLoyalty;
                 if (loyalty != -1 && loyalty != CardDbAdapter.NO_ONE_CARES) {
-
-                    if (loyalty == CardDbAdapter.X) {
-                        ((TextView) convertView.findViewById(R.id.cardt)).setText("X");
-                    } else if (loyalty == (int) loyalty) {
+                    if (loyalty == (int) loyalty) {
                         ((TextView) convertView.findViewById(R.id.cardt)).setText(Integer.toString((int) loyalty));
                     } else {
                         ((TextView) convertView.findViewById(R.id.cardt)).setText(Float.toString(loyalty));
@@ -854,8 +826,8 @@ public class WishlistFragment extends FamiliarFragment {
                 }
                 String setAndRarity = isi.mSet + " (" + isi.mRarity + ")";
                 ((TextView) setRow.findViewById(R.id.wishlistRowSet)).setText(setAndRarity);
-                ((TextView) setRow.findViewById(R.id.wishlistRowSet)).setTextColor(
-                        ContextCompat.getColor(getContext(), getResourceIdFromAttr(color)));
+                ((TextView) setRow.findViewById(R.id.wishlistRowSet)).setTextColor(getResources()
+                        .getColor(getResourceIdFromAttr(color)));
 
                 /* Show or hide the foil indicator */
                 if (isi.mIsFoil) {
@@ -870,11 +842,11 @@ public class WishlistFragment extends FamiliarFragment {
                     if (isi.mIsFoil) {
                         if (isi.mPrice != null && isi.mPrice.mFoilAverage != 0) {
                             priceText.setText(String.format(Locale.US, "%dx $%.02f", isi.mNumberOf, isi.mPrice.mFoilAverage));
-                            priceText.setTextColor(ContextCompat.getColor(getContext(),
+                            priceText.setTextColor(getResources().getColor(
                                     getResourceIdFromAttr(R.attr.color_text)));
                         } else {
                             priceText.setText(String.format(Locale.US, "%dx %s", isi.mNumberOf, isi.mMessage));
-                            priceText.setTextColor(ContextCompat.getColor(getContext(), R.color.material_red_500));
+                            priceText.setTextColor(getResources().getColor(R.color.material_red_500));
                         }
                     } else {
                         boolean priceFound = false;
@@ -903,13 +875,13 @@ public class WishlistFragment extends FamiliarFragment {
                                     }
                                     break;
                             }
-                            priceText.setTextColor(ContextCompat.getColor(getContext(),
+                            priceText.setTextColor(getResources().getColor(
                                     getResourceIdFromAttr(R.attr.color_text)
                             ));
                         }
                         if (!priceFound) {
                             priceText.setText(String.format(Locale.US, "%dx %s", isi.mNumberOf, isi.mMessage));
-                            priceText.setTextColor(ContextCompat.getColor(getContext(), R.color.material_red_500));
+                            priceText.setTextColor(getResources().getColor(R.color.material_red_500));
                         }
                     }
                 } else {

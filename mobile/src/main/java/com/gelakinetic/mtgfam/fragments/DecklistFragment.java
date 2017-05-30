@@ -50,17 +50,17 @@ import static com.gelakinetic.mtgfam.R.id.decklist;
 public class DecklistFragment extends FamiliarFragment {
 
     /* UI Elements */
-    private AutoCompleteTextView mNameField;
-    private EditText mNumberField;
+    public AutoCompleteTextView mNameField;
+    public EditText mNumberField;
     public TextView mDeckName;
-    private TextView mDeckCards;
-    private TextView mDeckPrice;
+    public TextView mDeckCards;
+    public TextView mDeckPrice;
 
     /* Decklist and adapters */
-    private ListView decklistView;
+    public ListView decklistView;
     public ArrayList<CompressedDecklistInfo> mCompressedDecklist;
     public DecklistArrayAdapter mDecklistAdapter;
-    private ComparatorChain<CompressedDecklistInfo> mDecklistChain;
+    public ComparatorChain mDecklistChain;
 
     public static final String AUTOSAVE_NAME = "autosave";
     public String mCurrentDeck = "";
@@ -265,7 +265,7 @@ public class DecklistFragment extends FamiliarFragment {
                 mCompressedDecklist.add(new CompressedDecklistInfo(card, isSideboard));
             }
 
-            /* Sort the decklist */
+            /* Sort the decklist */;
             Collections.sort(mCompressedDecklist, mDecklistChain);
 
 

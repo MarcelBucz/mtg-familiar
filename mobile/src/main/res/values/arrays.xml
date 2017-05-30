@@ -35,13 +35,12 @@
         <item>13</item>
         <item>14</item>
         <item>15</item>
-        <item>99</item>
         <item>*</item>
         <item>1+*</item>
         <item>2+*</item>
         <item>7-*</item>
+        <item>99</item>
         <item>*^2</item>
-        <item>X</item>
         <item>0.5</item>
         <item>1.5</item>
         <item>2.5</item>
@@ -179,8 +178,6 @@
         <item>@string/pref_German</item>
         <item>@string/pref_Portuguese</item>
         <item>@string/pref_Chinese</item>
-        <item>@string/pref_Chinese_trad</item>
-        <item>@string/pref_Korean</item>
     </string-array>
     <string-array name="card_language_values">
         <item>en</item>
@@ -192,8 +189,6 @@
         <item>de</item>
         <item>pt</item>
         <item>cn</item>
-        <item>tw</item>
-        <item>ko</item>
     </string-array>
     <string-array name="pref_language">
         <item>@string/pref_English</item>
@@ -203,7 +198,6 @@
         <item>@string/pref_Spanish</item>
         <item>@string/pref_Portuguese</item>
         <item>@string/pref_Polish</item>
-        <item>@string/pref_Slovak</item>
     </string-array>
     <string-array name="pref_language_values">
         <item>en</item>
@@ -213,7 +207,6 @@
         <item>es</item>
         <item>pt</item>
         <item>pl</item>
-        <item>sk</item>
     </string-array>
 
     <string-array name="life_timer_array_entries">
